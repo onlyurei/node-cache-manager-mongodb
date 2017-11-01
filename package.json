@@ -19,7 +19,7 @@
   "dependencies": {
     "mongodb": "^2.2.29",
     "mongodb-uri": "^0.9.7",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
