@@ -80,7 +80,7 @@ function MongoStore(args) {
         store.collection = collection;
         // Create an index on the a field
         collection.createIndex({
-          expiresAt : 1
+          expire : 1
         }, {
           unique : true,
           background : true,
