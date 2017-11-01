@@ -5,9 +5,8 @@
  */
 
 var Client = require('mongodb').MongoClient,
-  uri = require('mongodb-uri'),
-  _ = require('lodash'),
-  zlib = require('zlib'), noop = function () {};
+uri = require('mongodb-uri'),
+zlib = require('zlib'), noop = function () {};
 
 var validOptionNames = ['poolSize', 'ssl', 'sslValidate', 'sslCA', 'sslCert',
   'sslKey', 'sslPass', 'sslCRL', 'autoReconnect', 'noDelay', 'keepAlive', 'connectTimeoutMS', 'family',
@@ -58,10 +57,10 @@ function MongoStore(args) {
       } else {
         store.MongoOptions.database = store.MongoOptions.database || store.MongoOptions.db;
         store.MongoOptions.hosts = store.MongoOptions.hosts || [{
-          port : store.MongoOptions.port || 27017,
-          host : store.MongoOptions.host || '127.0.0.1'
-        }
-        ];
+              port : store.MongoOptions.port || 27017,
+              host : store.MongoOptions.host || '127.0.0.1'
+            }
+          ];
         store.MongoOptions.hosts = store.MongoOptions.hosts || 3600;
         conn = uri.format(store.MongoOptions);
       }
@@ -74,13 +73,13 @@ function MongoStore(args) {
   store.compression = store.MongoOptions.compression || false;
 
   if ('string' === typeof conn) {
-    Client.connect(conn, _.pick(store.MongoOptions, validOptionNames), function getDb(err, db) {
+    Client.connect(conn, store.MongoOptions, function getDb(err, db) {
       store.client = db;
       db.createCollection(store.coll, function (err, collection) {
         store.collection = collection;
         // Create an index on the a field
         collection.createIndex({
-          expire : 1
+          expiresAt : 1
         }, {
           unique : true,
           background : true,
@@ -162,7 +161,7 @@ MongoStore.prototype.get = function get(key, options, fn) {
     if (!data) {
       return fn(null, null);
     }
-    if (data.expire < Date.now()) {
+    if (data.expiresAt < Date.now()) {
       store.del(key);
       return fn(null, null);
     }
@@ -199,19 +198,19 @@ MongoStore.prototype.set = function set(key, val, options, fn) {
   var ttl = (options && (options.ttl || options.ttl === 0)) ? options.ttl : store.MongoOptions.ttl;
 
   var data,
-    query = {
-      key : key
-    },
-    options = {
-      upsert : true,
-      safe : true
-    };
+  query = {
+    key : key
+  },
+  options = {
+    upsert : true,
+    safe : true
+  };
 
   try {
     data = {
       key : key,
       value : val,
-      expire : Date.now() + ((ttl || 60) * 1000)
+      expiresAt : Date.now() + ((ttl || 60) * 1000)
     };
   } catch (err) {
     return fn(err);
