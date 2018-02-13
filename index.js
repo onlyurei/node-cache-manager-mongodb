@@ -230,9 +230,6 @@ MongoStore.prototype.set = function set(key, val, options, fn) {
 
   function update(data) {
     store.collection.update(query, data, options, function _update(err, data) {
-      if (err) {
-        return fn(err);
-      }
       if (!data) {
         return fn(null, null);
       }
